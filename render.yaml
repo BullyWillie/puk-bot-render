@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: puk-bot
+    env: python
+    buildCommand: pip install -r bot/requirements.txt
+    startCommand: cd bot && python Bot.py
+    envVars:
+      - key: TELEGRAM_TOKEN
+        sync: false
+      - key: OLLAMA_URL
+        value: http://ollama:11434
+    plan: free
+
+  - type: private
+    name: ollama
+    dockerfilePath: ./ollama/Dockerfile
+    env: docker
+    plan: free

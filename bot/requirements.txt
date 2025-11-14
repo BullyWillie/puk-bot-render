@@ -1,0 +1,4 @@
+aiogram==3.13.1
+aiosqlite==0.21.0
+langchain-ollama==0.3.1
+langchain-core==0.3.12
