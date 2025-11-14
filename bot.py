@@ -1,4 +1,4 @@
-# bot/Bot.py
+# Bot.py — В КОРНЕ РЕПОЗИТОРИЯ
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command, CommandStart
 from aiogram import F
@@ -18,7 +18,7 @@ OLLAMA_MODEL = "llama3.1:8b"
 
 # ====================== КЛАВИАТУРА ======================
 keyboard = ReplyKeyboardMarkup(
-    keyboard=[[KeyboardButton(text="Пукнуть 💨")]],
+    keyboard=[[KeyboardButton(text="Пукнуть")]],
     resize_keyboard=True
 )
 
@@ -35,9 +35,8 @@ llm = OllamaLLM(base_url=OLLAMA_URL, model=OLLAMA_MODEL)
 prompt_template = PromptTemplate(
     input_variables=["topic"],
     template=(
-        "Ты — мастер смешных пуков. Придумай короткий, зашифрованный 'пук' на тему '{topic}'. "
-        "Сделай его юмористичным: используй эмодзи, каламбуры, тишину, стул, запах, неожиданный поворот. "
-        "Максимум 1-2 предложения. Только текст, без объяснений. Пример: 'В тишине комнаты скрипнул стул... а потом 💨 неловкая пауза 🫢'."
+        "Придумай смешной пук на тему '{topic}'. "
+        "Коротко, с эмодзи, каламбуром. Только текст."
     )
 )
 
@@ -45,11 +44,10 @@ async def generate_puk(topic: str = "случайный пук") -> str:
     try:
         chain = prompt_template | llm
         puk = await asyncio.to_thread(chain.invoke, {"topic": topic})
-        puk = puk.strip()
-        return f"*{puk}*" if puk else "*п-у-к*... ИИ задумался 😴"
+        return f"*{puk.strip()}*"
     except Exception as e:
         print(f"[LLM ОШИБКА] {e}")
-        return "*п-у-к*... Модель отдыхает 💨"
+        return "*п-у-к*... ИИ спит"
 
 # ====================== БАЗА ======================
 async def init_db():
@@ -70,38 +68,23 @@ async def get_groups():
             rows = await cursor.fetchall()
             return [row[0] for row in rows]
 
-# ====================== ОТЛАДКА ======================
-def log(message: types.Message, action: str, response: str = None):
-    user = f"{message.from_user.full_name} (@{message.from_user.username})" if message.from_user else "Unknown"
-    chat = message.chat.title if hasattr(message.chat, 'title') else "ЛС"
-    text = message.text or "[не текст]"
-    print(f"\n[DEBUG] {action}")
-    print(f"   От: {user}")
-    print(f"   Чат: {chat} ({message.chat.type}, ID: {message.chat.id})")
-    print(f"   Текст: {text}")
-    if response:
-        print(f"   → Пук: {response}")
-    print("-" * 60)
-
 # ====================== КОМАНДЫ ======================
 @dp.message(CommandStart())
 async def start_private(message: types.Message):
-    me = await bot.get_me()
     response = (
-        f"Привет! Я — **Пук-бот с ИИ на Render**\n\n"
+        f"**Пук-бот с ИИ на Render**\n\n"
         f"• Кнопка → ИИ-пук\n"
-        f"• В группе: `/puk` → ИИ-пук\n"
-        f"• Автопук каждые 30 мин\n\n"
-        f"*Llama 3.1 локально!*"
+        f"• `/puk` в группе → пук\n"
+        f"• Автопук каждые 30 мин"
     )
     await message.answer(response, reply_markup=keyboard)
-    log(message, "ЛС: /start", response)
+    print(f"[ЛС] /start от {message.from_user.id}")
 
-@dp.message(F.text == "Пукнуть 💨", F.chat.type == "private")
+@dp.message(F.text == "Пукнуть", F.chat.type == "private")
 async def puk_button(message: types.Message):
     puk = await generate_puk()
     await message.answer(puk)
-    log(message, "ЛС: Кнопка", puk)
+    print(f"[ЛС] Кнопка → {puk}")
 
 @dp.message(Command("puk"))
 async def puk_command(message: types.Message):
@@ -110,7 +93,7 @@ async def puk_command(message: types.Message):
     await add_group(message.chat.id)
     puk = await generate_puk()
     await message.reply(puk)
-    log(message, "ГРУППА: /puk", puk)
+    print(f"[ГРУППА] /puk → {puk}")
 
 # ====================== АВТОПУК ======================
 async def auto_puk_task():
@@ -123,10 +106,7 @@ async def auto_puk_task():
             for chat_id in groups:
                 try:
                     await bot.send_message(chat_id, puk)
-                    chat = await bot.get_chat(chat_id)
-                    print(f"[АВТОПУК] → {chat.title}: {puk}")
-                except Exception as e:
-                    print(f"[ОШИБКА] {e}")
+                except: pass
         await asyncio.sleep(PUK_INTERVAL)
 
 # ====================== ЗАПУСК ======================

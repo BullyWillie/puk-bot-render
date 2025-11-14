@@ -1,0 +1,4 @@
+aiogram>=3.13.0,<4.0.0
+aiosqlite>=0.21.0,<1.0.0
+langchain-ollama>=0.3.0,<1.0.0
+langchain-core>=0.3.0,<1.0.0
