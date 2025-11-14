@@ -11,7 +11,7 @@ services:
         value: http://ollama:11434
     plan: free
 
-  - type: private
+  - type: worker
     name: ollama
     dockerfilePath: ./ollama/Dockerfile
     env: docker
