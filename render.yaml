@@ -1,20 +1,9 @@
 services:
-  # === БОТ ===
   - type: web
     name: puk-bot
-    runtime: python
-    plan: free
-    buildCommand: pip install -r requirements.txt
-    startCommand: python Bot.py
+    runtime: docker
+    dockerfilePath: Dockerfile
     envVars:
       - key: TELEGRAM_TOKEN
         sync: false
-      - key: OLLAMA_URL
-        value: http://ollama:11434
-
-  # === OLLAMA ===
-  - type: worker
-    name: ollama
-    runtime: docker          # ← ЭТО КЛЮЧЕВОЕ!
-    dockerfilePath: ollama/Dockerfile
     plan: free
