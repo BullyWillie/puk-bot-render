@@ -2,17 +2,18 @@ services:
   - type: web
     name: puk-bot
     env: python
+    region: oregon
+    plan: free
     buildCommand: pip install -r bot/requirements.txt
-    startCommand: cd bot && python Bot.py
+    startCommand: python bot/Bot.py
     envVars:
       - key: TELEGRAM_TOKEN
         sync: false
       - key: OLLAMA_URL
         value: http://ollama:11434
-    plan: free
 
   - type: worker
     name: ollama
-    dockerfilePath: ./ollama/Dockerfile
-    env: docker
+    dockerfilePath: ollama/Dockerfile
+    region: oregon
     plan: free
