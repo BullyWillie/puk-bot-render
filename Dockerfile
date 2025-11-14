@@ -2,11 +2,11 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-# Копируем из корня
+# Копируем файлы из src/ в /app
+COPY src/Bot.py .
 COPY requirements.txt .
+
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Копируем бота из src/
-COPY src/Bot.py .
-
+# ← ВАЖНО: Запускаем из /app, где Bot.py уже есть
 CMD ["python", "Bot.py"]
